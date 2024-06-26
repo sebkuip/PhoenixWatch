@@ -14,7 +14,9 @@ USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 
 bot = commands.Bot(command_prefix="!", intents=discord.Intents.all(), help_command=None)
-bot.reddit = asyncpraw.Reddit(
+
+async def connect_reddit():
+    bot.reddit = asyncpraw.Reddit(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     username=USERNAME,
@@ -24,6 +26,7 @@ bot.reddit = asyncpraw.Reddit(
 
 @bot.event
 async def on_ready():
+    await connect_reddit()
     print(f"{bot.user} has connected to Discord!")
     print(f"Username is {bot.user.name}")
     print(f"ID is {bot.user.id}")
