@@ -113,9 +113,14 @@ class Reddit(commands.Cog):
             embed = discord.Embed(
                 color=discord.Color.dark_red(),
                 title=entry.title,
-                url=entry.url,
+                url = f"https://www.reddit.com{entry.permalink}",
                 description=entry.selftext[:4000],
             )
+            if not entry.is_self:
+                if entry.url.find("i.reddit.com") == -1:
+                    embed.add_field(name="link", value={entry.url})
+                else:
+                    embed.set_image(entry.url)
         else:
             embed = discord.Embed(
                 color=discord.Color.dark_gold(),
