@@ -120,7 +120,7 @@ class Reddit(commands.Cog):
                 if entry.url.find("i.redd.it") == -1:
                     embed.add_field(name="link", value=entry.url, inline=False)
                 else:
-                    embed.set_image(entry.url)
+                    embed.set_image(url=entry.url)
         else:
             embed = discord.Embed(
                 color=discord.Color.dark_gold(),
