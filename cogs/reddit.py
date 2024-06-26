@@ -117,8 +117,8 @@ class Reddit(commands.Cog):
                 description=entry.selftext[:4000],
             )
             if not entry.is_self:
-                if entry.url.find("i.reddit.com") == -1:
-                    embed.add_field(name="link", value={entry.url}, inline=False)
+                if entry.url.find("i.redd.it") == -1:
+                    embed.add_field(name="link", value=entry.url, inline=False)
                 else:
                     embed.set_image(entry.url)
         else:
