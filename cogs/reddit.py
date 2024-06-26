@@ -25,7 +25,6 @@ class RemovalModal(discord.ui.Modal, title="Reason to remove"):
         )
         self.add_item(self.removal_text)
 
-
     async def on_submit(self, interaction: discord.Interaction):
         if len(self.removal_text.value) != 0:
             mod_comment = await self.entry.reply(self.removal_text.value)
