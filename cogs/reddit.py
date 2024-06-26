@@ -118,7 +118,7 @@ class Reddit(commands.Cog):
             )
             if not entry.is_self:
                 if entry.url.find("i.reddit.com") == -1:
-                    embed.add_field(name="link", value={entry.url})
+                    embed.add_field(name="link", value={entry.url}, inline=False)
                 else:
                     embed.set_image(entry.url)
         else:
@@ -131,7 +131,7 @@ class Reddit(commands.Cog):
         if entry.author:
             embed.set_author(name=f"/u/{entry.author.name}")
         else:
-            embed.sed_author(name="deleted user")
+            embed.set_author(name="deleted user")
 
         embed.add_field(
             name="Reports",
