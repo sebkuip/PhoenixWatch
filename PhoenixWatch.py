@@ -15,12 +15,16 @@ PASSWORD = os.getenv("PASSWORD")
 GUILD_ID = os.getenv("GUILD_ID")
 MODCHANNEL_ID = os.getenv("MODCHANNEL_ID")
 
+
 class PhoenixWatchBot(commands.Bot):
     reddit: asyncpraw.Reddit
     mod_guild: discord.Guild
     modqueue_channel: discord.TextChannel
 
-bot = PhoenixWatchBot(command_prefix="!", intents=discord.Intents.all(), help_command=None)
+
+bot = PhoenixWatchBot(
+    command_prefix="!", intents=discord.Intents.all(), help_command=None
+)
 
 
 async def connect_reddit():

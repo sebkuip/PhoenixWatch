@@ -9,6 +9,7 @@ from discord.ext import commands, tasks
 
 from ..PhoenixWatch import PhoenixWatchBot
 
+
 class RemovalModal(discord.ui.Modal, title="Reason to remove"):
     def __init__(self, entry, reason, modqueue, message):
         self.entry = entry
