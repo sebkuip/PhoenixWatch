@@ -93,7 +93,7 @@ class Reddit(commands.Cog):
 
     async def cog_load(self):
         self.subreddit = await self.bot.reddit.subreddit("PhoenixSC")
-        await self.bot.modqueue_channel.purge(limit=1000)
+        await self.bot.modqueue_channel.purge(limit=5000)
 
     @tasks.loop(minutes=10)
     async def get_config(self):
