@@ -204,7 +204,7 @@ class Reddit(commands.Cog):
             ephemeral=True,
         )
 
-    def create_modmail_embed(
+    async def create_modmail_embed(
         self, modmail: asyncpraw.models.ModmailConversation
     ) -> discord.Embed:
         await modmail.load()
