@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import typing
 
@@ -7,7 +9,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-from ..PhoenixWatch import PhoenixWatchBot
+if typing.TYPE_CHECKING:
+    from ..PhoenixWatch import PhoenixWatchBot
 
 
 class RemovalModal(discord.ui.Modal, title="Reason to remove"):
@@ -202,7 +205,7 @@ class Reddit(commands.Cog):
             ephemeral=True,
         )
 
-    async def create_modmail_embed(
+    def create_modmail_embed(
         self, modmail: asyncpraw.models.ModmailConversation
     ) -> discord.Embed:
         embed = discord.Embed(
