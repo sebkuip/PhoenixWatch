@@ -150,6 +150,7 @@ class Reddit(commands.Cog):
         items = [item async for item in self.subreddit.mod.modqueue(limit=None)]
 
         for entry in self.modqueue.keys() - items:
+            await self.modqueue[entry].delete()
             del self.modqueue[entry]
 
         for entry in items - self.modqueue.keys():
