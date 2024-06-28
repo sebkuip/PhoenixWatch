@@ -14,12 +14,14 @@ USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 GUILD_ID = os.getenv("GUILD_ID")
 MODCHANNEL_ID = os.getenv("MODCHANNEL_ID")
+MODMAIL_CHANNEL_ID = os.getenv("MODMAIL_CHANNEL_ID")
 
 
 class PhoenixWatchBot(commands.Bot):
     reddit: asyncpraw.Reddit
     mod_guild: discord.Guild
     modqueue_channel: discord.TextChannel
+    modmail_channel: discord.TextChannel
 
 
 bot = PhoenixWatchBot(
@@ -42,6 +44,8 @@ async def on_ready():
     await connect_reddit()
     bot.mod_guild = await bot.fetch_guild(GUILD_ID)
     bot.modqueue_channel = await bot.mod_guild.fetch_channel(MODCHANNEL_ID)
+    bot.modmail_channel = await bot.mod_guild.fetch_channel(MODMAIL_CHANNEL_ID)
+
     print(f"{bot.user} has connected to Discord!")
     print(f"Username is {bot.user.name}")
     print(f"ID is {bot.user.id}")

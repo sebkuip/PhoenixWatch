@@ -78,8 +78,15 @@ class RemovalDropdownView(discord.ui.View):
 class Reddit(commands.Cog):
     def __init__(self, bot: PhoenixWatchBot):
         self.bot = bot
+
+        assert bot.mod_guild
+        assert bot.modmail_channel
+        assert bot.modmail_channel
+
         self.get_config.start()
         self.get_modqueue.start()
+        self.get_modmail.start()
+
         self.modqueue: dict[
             typing.Union[asyncpraw.models.Submission, asyncpraw.models.Comment],
             discord.Message,
@@ -129,7 +136,7 @@ class Reddit(commands.Cog):
         if entry.author:
             embed.set_author(name=f"/u/{entry.author.name}")
         else:
-            embed.sed_author(name="deleted user")
+            embed.set_author(name="deleted user")
 
         embed.add_field(
             name="Reports",
