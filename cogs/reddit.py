@@ -7,7 +7,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-from ..PhoenixWatch import PhoenixWatchBot
+from PhoenixWatch import PhoenixWatchBot
 
 
 class RemovalModal(discord.ui.Modal, title="Reason to remove"):
@@ -205,9 +205,11 @@ class Reddit(commands.Cog):
     async def create_modmail_embed(
         self, modmail: asyncpraw.models.ModmailConversation
     ) -> discord.Embed:
+        await modmail.load()
+        await modmail.participant.load()
         embed = discord.Embed(
             title=f"new modmail: {modmail.subject[:100]}",
-            description=modmail.messages[-1][:4000],
+            description=modmail.messages[-1].body_markdown[:4000],
         )
         embed.set_author(
             name=modmail.participant.name, icon_url=modmail.participant.icon_img
@@ -221,7 +223,7 @@ class Reddit(commands.Cog):
         ] = self.subreddit.modmail.conversations(sort="unread", state="all")
 
         async for conv in new_conversations:
-            embed = self.create_modmail_embed(conv)
+            embed = await self.create_modmail_embed(conv)
             await self.bot.modmail_channel.send(embed=embed)
             await conv.read()
 
@@ -229,7 +231,7 @@ class Reddit(commands.Cog):
             asyncpraw.models.ModmailConversation
         ] = self.subreddit.modmail.conversations(sort="unread", state="appeals")
         async for conv in appeals_conversations:
-            embed = self.create_modmail_embed(conv)
+            embed = await self.create_modmail_embed(conv)
             await self.bot.modmail_channel.send(embed=embed)
             await conv.read()
 
