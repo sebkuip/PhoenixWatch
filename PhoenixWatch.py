@@ -66,22 +66,22 @@ async def sync(ctx: commands.Context):
     )
 
 
-@bot.tree.command(name="hug", description="Give someone a big squeeze")
-async def hug(interaction: discord.Interaction, user: discord.User):
-    if interaction.user == user:
+@bot.hybrid_command(name="hug", description="Give someone a big squeeze")
+async def hug(ctx: commands.Context, user: discord.User):
+    if ctx.user == user:
         embed = discord.Embed(description=f"{user.display_name} hugged themselves")
     else:
         embed = discord.Embed(
-            description=f"{interaction.user.display_name} 🫂 {user.display_name}"
+            description=f"{ctx.user.display_name} 🫂 {user.display_name}"
         )
-    await interaction.response.send_message(embed=embed)
+    await ctx.reply(embed=embed)
 
 
-@bot.tree.command(name="ping", description="Shows the latency the bot is experiencing")
-async def ping(interaction: discord.Interaction):
+@bot.hybrid_command(name="ping", description="Shows the latency the bot is experiencing")
+async def ping(ctx: commands.Context):
     before = time.perf_counter()
-    await interaction.response.send_message("testing...")
-    await interaction.edit_original_response(
+    msg = await ctx.reply("testing...")
+    await msg.edit(
         content=f"pong!\nbot latency: {round((time.perf_counter() - before) * 1000)}ms\nwebsocket latency: {round(bot.latency * 1000)}ms"
     )
 
