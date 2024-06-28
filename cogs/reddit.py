@@ -195,6 +195,37 @@ class Reddit(commands.Cog):
             ephemeral=True,
         )
 
+    async def create_modmail_embed(
+        self, modmail: asyncpraw.models.ModmailConversation
+    ) -> discord.Embed:
+        embed = discord.Embed(
+            title=f"new modmail: {modmail.subject[:100]}",
+            description=modmail.messages[-1][:4000],
+        )
+        embed.set_author(
+            name=modmail.participant.name, icon_url=modmail.participant.icon_img
+        )
+        return embed
+
+    @tasks.loop(minutes=1)
+    async def get_modmail(self):
+        new_conversations: typing.AsyncIterator[
+            asyncpraw.models.ModmailConversation
+        ] = self.subreddit.modmail.conversations(sort="unread", state="all")
+
+        async for conv in new_conversations:
+            embed = self.create_modmail_embed(conv)
+            await self.bot.modqueue_channel.send(embed=embed)
+            await conv.read()
+
+        appeals_conversations: typing.AsyncIterator[
+            asyncpraw.models.ModmailConversation
+        ] = self.subreddit.modmail.conversations(sort="unread", state="appeals")
+        async for conv in appeals_conversations:
+            embed = self.create_modmail_embed(conv)
+            await self.bot.modqueue_channel.send(embed=embed)
+            await conv.read()
+
 
 async def setup(bot):
     await bot.add_cog(Reddit(bot))
