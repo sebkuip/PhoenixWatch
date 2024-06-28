@@ -96,7 +96,7 @@ class Reddit(commands.Cog):
 
     async def cog_load(self):
         self.subreddit = await self.bot.reddit.subreddit("PhoenixSC")
-        await self.bot.modqueue_channel.purge(limit=1000)
+        await self.bot.modqueue_channel.purge(limit=5000)
 
     @tasks.loop(minutes=10)
     async def get_config(self):
@@ -116,9 +116,14 @@ class Reddit(commands.Cog):
             embed = discord.Embed(
                 color=discord.Color.dark_red(),
                 title=entry.title,
-                url=entry.url,
+                url = f"https://www.reddit.com{entry.permalink}",
                 description=entry.selftext[:4000],
             )
+            if not entry.is_self:
+                if entry.url.find("i.redd.it") == -1:
+                    embed.add_field(name="link", value=entry.url, inline=False)
+                else:
+                    embed.set_image(url=entry.url)
         else:
             embed = discord.Embed(
                 color=discord.Color.dark_gold(),
@@ -129,7 +134,7 @@ class Reddit(commands.Cog):
         if entry.author:
             embed.set_author(name=f"/u/{entry.author.name}")
         else:
-            embed.sed_author(name="deleted user")
+            embed.set_author(name="deleted user")
 
         embed.add_field(
             name="Reports",
@@ -148,6 +153,7 @@ class Reddit(commands.Cog):
         items = [item async for item in self.subreddit.mod.modqueue(limit=None)]
 
         for entry in self.modqueue.keys() - items:
+            await self.modqueue[entry].delete()
             del self.modqueue[entry]
 
         for entry in items - self.modqueue.keys():
