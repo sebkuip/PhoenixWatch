@@ -208,14 +208,23 @@ class Reddit(commands.Cog):
         self, modmail: asyncpraw.models.ModmailConversation
     ) -> discord.Embed:
         await modmail.load()
-        await modmail.participant.load()
+        author_found = False
+        try:
+            await modmail.participant.load()
+            author_found = True
+        except Exception:
+            pass
         embed = discord.Embed(
             title=f"new modmail: {modmail.subject[:100]}",
             description=modmail.messages[-1].body_markdown[:4000],
+            url=f"https://mod.reddit.com/mail/all/{modmail.id}/"
         )
-        embed.set_author(
-            name=modmail.participant.name, icon_url=modmail.participant.icon_img
-        )
+        if author_found:
+            embed.set_author(
+                name=modmail.participant.name, icon_url=modmail.participant.icon_img
+            )
+        else:
+            embed.set_author(name="Deleted user")
         return embed
 
     @tasks.loop(minutes=1)
