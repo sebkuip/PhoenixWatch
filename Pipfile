@@ -10,6 +10,8 @@ asyncpraw = "*"
 jishaku = "*"
 
 [dev-packages]
+black = "*"
+isort = "*"
 
 [scripts]
 bot = "python PhoenixWatch.py"

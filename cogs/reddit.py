@@ -2,9 +2,12 @@ import asyncio
 import typing
 
 import asyncpraw
+import asyncpraw.models
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
+
+from ..PhoenixWatch import PhoenixWatchBot
 
 
 class RemovalModal(discord.ui.Modal, title="Reason to remove"):
@@ -73,7 +76,7 @@ class RemovalDropdownView(discord.ui.View):
 
 
 class Reddit(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: PhoenixWatchBot):
         self.bot = bot
         self.get_config.start()
         self.get_modqueue.start()
