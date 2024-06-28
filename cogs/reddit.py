@@ -237,7 +237,7 @@ class Reddit(commands.Cog):
     async def get_modmail(self):
         new_conversations: typing.AsyncIterator[
             asyncpraw.models.ModmailConversation
-        ] = self.subreddit.modmail.conversations(sort="unread", state="all")
+        ] = self.subreddit.modmail.conversations(sort="unread", state="new")
 
         async for conv in new_conversations:
             embed = await self.create_modmail_embed(conv)
