@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import typing
 
@@ -202,7 +204,7 @@ class Reddit(commands.Cog):
             ephemeral=True,
         )
 
-    async def create_modmail_embed(
+    def create_modmail_embed(
         self, modmail: asyncpraw.models.ModmailConversation
     ) -> discord.Embed:
         await modmail.load()
