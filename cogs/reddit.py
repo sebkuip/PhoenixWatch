@@ -78,8 +78,15 @@ class RemovalDropdownView(discord.ui.View):
 class Reddit(commands.Cog):
     def __init__(self, bot: PhoenixWatchBot):
         self.bot = bot
+
+        assert bot.mod_guild
+        assert bot.modmail_channel
+        assert bot.modmail_channel
+
         self.get_config.start()
         self.get_modqueue.start()
+        self.get_modmail.start()
+
         self.modqueue: dict[
             typing.Union[asyncpraw.models.Submission, asyncpraw.models.Comment],
             discord.Message,
@@ -200,6 +207,37 @@ class Reddit(commands.Cog):
             ),
             ephemeral=True,
         )
+
+    async def create_modmail_embed(
+        self, modmail: asyncpraw.models.ModmailConversation
+    ) -> discord.Embed:
+        embed = discord.Embed(
+            title=f"new modmail: {modmail.subject[:100]}",
+            description=modmail.messages[-1][:4000],
+        )
+        embed.set_author(
+            name=modmail.participant.name, icon_url=modmail.participant.icon_img
+        )
+        return embed
+
+    @tasks.loop(minutes=1)
+    async def get_modmail(self):
+        new_conversations: typing.AsyncIterator[
+            asyncpraw.models.ModmailConversation
+        ] = self.subreddit.modmail.conversations(sort="unread", state="all")
+
+        async for conv in new_conversations:
+            embed = self.create_modmail_embed(conv)
+            await self.bot.modmail_channel.send(embed=embed)
+            await conv.read()
+
+        appeals_conversations: typing.AsyncIterator[
+            asyncpraw.models.ModmailConversation
+        ] = self.subreddit.modmail.conversations(sort="unread", state="appeals")
+        async for conv in appeals_conversations:
+            embed = self.create_modmail_embed(conv)
+            await self.bot.modmail_channel.send(embed=embed)
+            await conv.read()
 
 
 async def setup(bot):
