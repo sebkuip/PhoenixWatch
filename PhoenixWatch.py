@@ -109,4 +109,5 @@ async def load_extensions():
         await bot.load_extension("jishaku")
 
 
-bot.run(TOKEN)
+if __name__ == "__main__":
+    bot.run(TOKEN)
