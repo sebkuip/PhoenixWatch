@@ -125,7 +125,7 @@ class Reddit(commands.Cog):
             embed = discord.Embed(
                 color=discord.Color.dark_red(),
                 title=entry.title,
-                url = f"https://www.reddit.com{entry.permalink}",
+                url=f"https://www.reddit.com{entry.permalink}",
                 description=entry.selftext[:4000],
             )
             if not entry.is_self:
