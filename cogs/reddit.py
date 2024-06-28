@@ -220,11 +220,20 @@ class Reddit(commands.Cog):
             author_found = True
         except Exception:
             pass
-        embed = discord.Embed(
-            title=f"new modmail: {modmail.subject[:100]}",
-            description=modmail.messages[-1].body_markdown[:4000],
-            url=f"https://mod.reddit.com/mail/all/{modmail.id}/",
-        )
+        if modmail.num_messages == 1:
+            embed = discord.Embed(
+                title=f"new modmail: {modmail.subject[:100]}",
+                description=modmail.messages[-1].body_markdown[:4000],
+                url=f"https://mod.reddit.com/mail/all/{modmail.id}/",
+                color=discord.Color.blurple(),
+            )
+        else:
+            embed = discord.Embed(
+                title=f"new reply: {modmail.subject[:100]}",
+                description=modmail.messages[-1].body_markdown[:4000],
+                url=f"https://mod.reddit.com/mail/all/{modmail.id}/",
+                color=discord.Color.gold(),
+            )
         if author_found:
             embed.set_author(
                 name=modmail.participant.name, icon_url=modmail.participant.icon_img
@@ -237,9 +246,11 @@ class Reddit(commands.Cog):
     async def get_modmail(self):
         new_conversations: typing.AsyncIterator[
             asyncpraw.models.ModmailConversation
-        ] = self.subreddit.modmail.conversations(sort="unread", state="new")
+        ] = self.subreddit.modmail.conversations(sort="unread", state="all")
 
         async for conv in new_conversations:
+            if conv.last_unread is None:
+                break
             embed = await self.create_modmail_embed(conv)
             await self.bot.modmail_channel.send(embed=embed)
             await conv.read()
@@ -248,6 +259,8 @@ class Reddit(commands.Cog):
             asyncpraw.models.ModmailConversation
         ] = self.subreddit.modmail.conversations(sort="unread", state="appeals")
         async for conv in appeals_conversations:
+            if conv.last_unread is None:
+                return
             embed = await self.create_modmail_embed(conv)
             await self.bot.modmail_channel.send(embed=embed)
             await conv.read()
