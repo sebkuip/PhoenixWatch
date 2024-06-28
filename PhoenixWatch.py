@@ -6,12 +6,12 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-load_dotenv(".env")
+load_dotenv(".env", override=True)
 TOKEN = os.getenv("TOKEN")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
+REDDIT_USERNAME = os.getenv("REDDIT_USERNAME")
+REDDIT_PASSWORD = os.getenv("REDDIT_PASSWORD")
 GUILD_ID = os.getenv("GUILD_ID")
 MODCHANNEL_ID = os.getenv("MODCHANNEL_ID")
 MODMAIL_CHANNEL_ID = os.getenv("MODMAIL_CHANNEL_ID")
@@ -28,13 +28,12 @@ bot = PhoenixWatchBot(
     command_prefix="!", intents=discord.Intents.all(), help_command=None
 )
 
-
 async def connect_reddit():
     bot.reddit = asyncpraw.Reddit(
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
-        username=USERNAME,
-        password=PASSWORD,
+        username=REDDIT_USERNAME,
+        password=REDDIT_PASSWORD,
         user_agent="Moderation bot for r/phoenixsc",
     )
 
