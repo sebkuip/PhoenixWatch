@@ -28,6 +28,7 @@ bot = PhoenixWatchBot(
     command_prefix="!", intents=discord.Intents.all(), help_command=None
 )
 
+
 async def connect_reddit():
     bot.reddit = asyncpraw.Reddit(
         client_id=CLIENT_ID,
