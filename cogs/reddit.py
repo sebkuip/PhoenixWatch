@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import typing
+import shelve
 
 import asyncpraw
 import asyncpraw.models
@@ -37,6 +38,7 @@ class RemovalModal(discord.ui.Modal, title="Reason to remove"):
             await mod_comment.mod.lock()
         await self.entry.mod.remove()
         del self.modqueue[self.entry]
+        self.modqueue.sync()
         await self.original_message.delete()
         await interaction.response.send_message("removed entry", ephemeral=True)
 
@@ -89,10 +91,10 @@ class Reddit(commands.Cog):
         self.get_modqueue.start()
         self.get_modmail.start()
 
-        self.modqueue: dict[
+        self.modqueue: shelve.Shelf[
             typing.Union[asyncpraw.models.Submission, asyncpraw.models.Comment],
             discord.Message,
-        ] = {}
+        ] = shelve.open("modqueue.db")
 
         self.approve_ctx_menu = app_commands.ContextMenu(
             name="Approve a modqueue entry", callback=self.approve_entry
@@ -105,7 +107,10 @@ class Reddit(commands.Cog):
 
     async def cog_load(self):
         self.subreddit = await self.bot.reddit.subreddit("PhoenixSC")
-        await self.bot.modqueue_channel.purge(limit=5000)
+
+    async def cog_unload(self) -> None:
+        self.modqueue.close()
+        return await super().cog_unload()
 
     @tasks.loop(minutes=10)
     async def get_config(self):
@@ -125,7 +130,7 @@ class Reddit(commands.Cog):
             embed = discord.Embed(
                 color=discord.Color.dark_red(),
                 title=entry.title,
-                url = f"https://www.reddit.com{entry.permalink}",
+                url=f"https://www.reddit.com{entry.permalink}",
                 description=entry.selftext[:4000],
             )
             if not entry.is_self:
@@ -170,8 +175,11 @@ class Reddit(commands.Cog):
             message = await self.bot.modqueue_channel.send(embed=embed)
             self.modqueue[entry] = message
 
+        self.modqueue.sync()
+
     @get_modqueue.error
-    async def get_modqueue_error(self):
+    async def get_modqueue_error(self, err):
+        print("modqueue err:", err)
         await asyncio.sleep(60)
         self.get_modqueue.start()
 
@@ -187,6 +195,7 @@ class Reddit(commands.Cog):
         entry = list(self.modqueue.keys())[list(self.modqueue.values()).index(message)]
         await entry.mod.approve()
         del self.modqueue[entry]
+        self.modqueue.sync()
         await message.delete()
         await interaction.response.send_message(
             "approved message", ephemeral=True, delete_after=10
@@ -264,6 +273,12 @@ class Reddit(commands.Cog):
             embed = await self.create_modmail_embed(conv)
             await self.bot.modmail_channel.send(embed=embed)
             await conv.read()
+
+    @get_modmail.error
+    async def get_modmail_error(self, err):
+        print("modmail err:", err)
+        await asyncio.sleep(60)
+        self.get_modmail.start()
 
 
 async def setup(bot):
