@@ -219,14 +219,14 @@ class Reddit(commands.Cog):
                 title=f"new modmail: {modmail.subject[:100]}",
                 description=modmail.messages[-1].body_markdown[:4000],
                 url=f"https://mod.reddit.com/mail/all/{modmail.id}/",
-                color=discord.Color.blurple()
+                color=discord.Color.blurple(),
             )
         else:
             embed = discord.Embed(
                 title=f"new reply: {modmail.subject[:100]}",
                 description=modmail.messages[-1].body_markdown[:4000],
                 url=f"https://mod.reddit.com/mail/all/{modmail.id}/",
-                color=discord.Color.gold()
+                color=discord.Color.gold(),
             )
         if author_found:
             embed.set_author(
