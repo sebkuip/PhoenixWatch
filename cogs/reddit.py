@@ -244,7 +244,7 @@ class Reddit(commands.Cog):
 
         async for conv in new_conversations:
             if conv.last_unread is None:
-                return
+                break
             embed = await self.create_modmail_embed(conv)
             await self.bot.modmail_channel.send(embed=embed)
             await conv.read()
