@@ -108,5 +108,6 @@ async def load_extensions():
         print(errors) if errors else print("no errors during loading")
         await bot.load_extension("jishaku")
 
+
 if __name__ == "__main__":
     bot.run(TOKEN)

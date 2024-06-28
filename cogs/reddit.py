@@ -217,7 +217,7 @@ class Reddit(commands.Cog):
         embed = discord.Embed(
             title=f"new modmail: {modmail.subject[:100]}",
             description=modmail.messages[-1].body_markdown[:4000],
-            url=f"https://mod.reddit.com/mail/all/{modmail.id}/"
+            url=f"https://mod.reddit.com/mail/all/{modmail.id}/",
         )
         if author_found:
             embed.set_author(
