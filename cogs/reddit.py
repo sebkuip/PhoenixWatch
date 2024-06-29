@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import typing
+from datetime import datetime
 
 import asyncpraw
 import asyncpraw.models
@@ -127,6 +128,7 @@ class Reddit(commands.Cog):
     async def cog_load(self):
         self.subreddit = await self.bot.reddit.subreddit("PhoenixSC")
         await self.bot.modqueue_channel.purge(limit=5000)
+        await self.bot.important_modqueue_channel.purge(limit=1000)
 
     @tasks.loop(minutes=10)
     async def get_config(self):
@@ -148,6 +150,7 @@ class Reddit(commands.Cog):
                 title=entry.title,
                 url=f"https://www.reddit.com{entry.permalink}",
                 description=entry.selftext[:4000],
+                timestamp=datetime.fromtimestamp(entry.created_utc),
             )
             if not entry.is_self:
                 if entry.url.find("i.redd.it") == -1:
@@ -160,6 +163,7 @@ class Reddit(commands.Cog):
                 title=f'Comment on post "{entry.link_title}"',
                 url=f"https://www.reddit.com{entry.permalink}",
                 description=entry.body[:4000],
+                timestamp=datetime.fromtimestamp(entry.created_utc),
             )
         if entry.author:
             embed.set_author(name=f"/u/{entry.author.name}")
@@ -178,6 +182,9 @@ class Reddit(commands.Cog):
         )
         return embed
 
+    def is_entry_urgent(self, entry):
+        return len(entry.user_reports) > 0
+
     @tasks.loop(minutes=1)
     async def get_modqueue(self):
         items = [item async for item in self.subreddit.mod.modqueue(limit=None)]
@@ -187,13 +194,20 @@ class Reddit(commands.Cog):
             del self.modqueue[entry]
 
         for entry in items - self.modqueue.keys():
+            channel = (
+                self.bot.modqueue_channel
+                if not self.is_entry_urgent(entry)
+                else self.bot.important_modqueue_channel
+            )
+
             embed = self.create_modqueue_item_embed(entry)
             view = ModqueueView(self.modqueue, entry)
-            message = await self.bot.modqueue_channel.send(embed=embed, view=view)
+            message = await channel.send(embed=embed, view=view)
             self.modqueue[entry] = message
 
     @get_modqueue.error
-    async def get_modqueue_error(self):
+    async def get_modqueue_error(self, err):
+        print("modqueue error", err)
         await asyncio.sleep(60)
         self.get_modqueue.start()
 
@@ -286,6 +300,12 @@ class Reddit(commands.Cog):
             embed = await self.create_modmail_embed(conv)
             await self.bot.modmail_channel.send(embed=embed)
             await conv.read()
+
+    @get_modmail.error
+    async def get_modqueue_error(self, err):
+        print("modmail error", err)
+        await asyncio.sleep(60)
+        self.get_modmail.start()
 
 
 async def setup(bot):
