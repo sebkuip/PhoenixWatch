@@ -77,7 +77,9 @@ async def hug(ctx: commands.Context, user: discord.User):
     await ctx.reply(embed=embed)
 
 
-@bot.hybrid_command(name="ping", description="Shows the latency the bot is experiencing")
+@bot.hybrid_command(
+    name="ping", description="Shows the latency the bot is experiencing"
+)
 async def ping(ctx: commands.Context):
     before = time.perf_counter()
     msg = await ctx.reply("testing...")
