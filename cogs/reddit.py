@@ -77,6 +77,26 @@ class RemovalDropdownView(discord.ui.View):
         self.add_item(RemovalDropdown(entry, reasons, modqueue, message))
 
 
+# If we ever make the messages not delete
+# class ApproveButton(discord.ui.DynamicItem[discord.ui.Button], template=r'approve:(?P<post>t3_[a-z0-9]+)'):
+class ModqueueView(discord.ui.View):
+
+    def __init__(self, entry):
+        self.entry = entry
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label="approve", style=discord.ButtonStyle.green)
+    async def approve(self, interaction: discord.Interaction, _: discord.ui.Button):
+        await self.entry.mod.approve()
+        del self.modqueue[self.entry]
+        await interaction.message.delete()
+        await interaction.response.send_message(
+            "approved message", ephemeral=True, delete_after=10
+        )
+
+    # todo: add remove button
+
+
 class Reddit(commands.Cog):
     def __init__(self, bot: PhoenixWatchBot):
         self.bot = bot
@@ -125,7 +145,7 @@ class Reddit(commands.Cog):
             embed = discord.Embed(
                 color=discord.Color.dark_red(),
                 title=entry.title,
-                url = f"https://www.reddit.com{entry.permalink}",
+                url=f"https://www.reddit.com{entry.permalink}",
                 description=entry.selftext[:4000],
             )
             if not entry.is_self:
@@ -167,7 +187,8 @@ class Reddit(commands.Cog):
 
         for entry in items - self.modqueue.keys():
             embed = self.create_modqueue_item_embed(entry)
-            message = await self.bot.modqueue_channel.send(embed=embed)
+            view = ModqueueView(entry)
+            message = await self.bot.modqueue_channel.send(embed=embed, view=view)
             self.modqueue[entry] = message
 
     @get_modqueue.error
