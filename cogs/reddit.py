@@ -93,7 +93,7 @@ class Reddit(commands.Cog):
 
         self.modqueue: shelve.Shelf[
             typing.Union[asyncpraw.models.Submission, asyncpraw.models.Comment],
-            discord.Message,
+            discord.Message.id,
         ] = shelve.open("modqueue.db")
 
         self.approve_ctx_menu = app_commands.ContextMenu(
@@ -167,13 +167,13 @@ class Reddit(commands.Cog):
         items = [item async for item in self.subreddit.mod.modqueue(limit=None)]
 
         for entry in self.modqueue.keys() - items:
-            await self.modqueue[entry].delete()
+            await self.bot.modqueue_channel.get_partial_message(self.modqueue[entry]).delete()
             del self.modqueue[entry]
 
         for entry in items - self.modqueue.keys():
             embed = self.create_modqueue_item_embed(entry)
             message = await self.bot.modqueue_channel.send(embed=embed)
-            self.modqueue[entry] = message
+            self.modqueue[entry] = message.id
 
         self.modqueue.sync()
 
@@ -192,7 +192,7 @@ class Reddit(commands.Cog):
             )
             return
 
-        entry = list(self.modqueue.keys())[list(self.modqueue.values()).index(message)]
+        entry = list(self.modqueue.keys())[list(self.modqueue.values()).index(message.id)]
         await entry.mod.approve()
         del self.modqueue[entry]
         self.modqueue.sync()
@@ -210,7 +210,7 @@ class Reddit(commands.Cog):
             )
             return
 
-        entry = list(self.modqueue.keys())[list(self.modqueue.values()).index(message)]
+        entry = list(self.modqueue.keys())[list(self.modqueue.values()).index(message.id)]
         await interaction.response.send_message(
             "please select the removal reason",
             view=RemovalDropdownView(
