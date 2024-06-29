@@ -81,7 +81,8 @@ class RemovalDropdownView(discord.ui.View):
 # class ApproveButton(discord.ui.DynamicItem[discord.ui.Button], template=r'approve:(?P<post>t3_[a-z0-9]+)'):
 class ModqueueView(discord.ui.View):
 
-    def __init__(self, entry):
+    def __init__(self, modqueue, entry):
+        self.modqueue = modqueue
         self.entry = entry
         super().__init__(timeout=None)
 
@@ -187,7 +188,7 @@ class Reddit(commands.Cog):
 
         for entry in items - self.modqueue.keys():
             embed = self.create_modqueue_item_embed(entry)
-            view = ModqueueView(entry)
+            view = ModqueueView(self.modqueue, entry)
             message = await self.bot.modqueue_channel.send(embed=embed, view=view)
             self.modqueue[entry] = message
 
