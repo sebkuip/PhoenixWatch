@@ -95,7 +95,7 @@ class ModqueueView(discord.ui.View):
             "approved message", ephemeral=True, delete_after=10
         )
 
-    @discord.ui.Button(label="quick remove", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="quick remove", style=discord.ButtonStyle.red)
     async def quick_remove(self, interaction: discord.Interaction, _):
         await self.entry.mod.remove()
         del self.modqueue[self.entry]
@@ -108,11 +108,6 @@ class ModqueueView(discord.ui.View):
 class Reddit(commands.Cog):
     def __init__(self, bot: PhoenixWatchBot):
         self.bot = bot
-
-        assert bot.mod_guild
-        assert bot.modmail_channel
-        assert bot.modmail_channel
-
         self.get_config.start()
         self.get_modqueue.start()
         self.get_modmail.start()
