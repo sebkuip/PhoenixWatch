@@ -81,7 +81,6 @@ class RemovalDropdownView(discord.ui.View):
 # If we ever make the messages not delete
 # class ApproveButton(discord.ui.DynamicItem[discord.ui.Button], template=r'approve:(?P<post>t3_[a-z0-9]+)'):
 class ModqueueView(discord.ui.View):
-
     def __init__(self, modqueue, entry):
         self.modqueue = modqueue
         self.entry = entry
@@ -96,17 +95,19 @@ class ModqueueView(discord.ui.View):
             "approved message", ephemeral=True, delete_after=10
         )
 
-    # todo: add remove button
+    @discord.ui.button(label="quick remove", style=discord.ButtonStyle.red)
+    async def quick_remove(self, interaction: discord.Interaction, _):
+        await self.entry.mod.remove()
+        del self.modqueue[self.entry]
+        await interaction.message.delete()
+        await interaction.response.send_message(
+            "removed entry without removal reason", ephemeral=True, delete_after=10
+        )
 
 
 class Reddit(commands.Cog):
     def __init__(self, bot: PhoenixWatchBot):
         self.bot = bot
-
-        assert bot.mod_guild
-        assert bot.modmail_channel
-        assert bot.modmail_channel
-
         self.get_config.start()
         self.get_modqueue.start()
         self.get_modmail.start()
@@ -202,6 +203,7 @@ class Reddit(commands.Cog):
 
             embed = self.create_modqueue_item_embed(entry)
             view = ModqueueView(self.modqueue, entry)
+
             message = await channel.send(embed=embed, view=view)
             self.modqueue[entry] = message
 
@@ -214,7 +216,10 @@ class Reddit(commands.Cog):
     async def approve_entry(
         self, interaction: discord.Interaction, message: discord.Message
     ):
-        if message.channel.id != self.bot.modqueue_channel.id:
+        if message.channel.id not in (
+            self.bot.modqueue_channel.id,
+            self.bot.important_modqueue_channel.id,
+        ):
             await interaction.response.send_message(
                 "You can only use this in the modqueue channel", ephemeral=True
             )
@@ -231,7 +236,10 @@ class Reddit(commands.Cog):
     async def remove_entry(
         self, interaction: discord.Interaction, message: discord.Message
     ):
-        if message.channel.id != self.bot.modqueue_channel.id:
+        if message.channel.id not in (
+            self.bot.modqueue_channel.id,
+            self.bot.important_modqueue_channel.id,
+        ):
             await interaction.response.send_message(
                 "You can only use this in the modqueue channel", ephemeral=True
             )
