@@ -78,11 +78,11 @@ async def sync(ctx: commands.Context):
 
 @bot.hybrid_command(name="hug", description="Give someone a big squeeze")
 async def hug(ctx: commands.Context, user: discord.User):
-    if ctx.user == user:
+    if ctx.author == user:
         embed = discord.Embed(description=f"{user.display_name} hugged themselves")
     else:
         embed = discord.Embed(
-            description=f"{ctx.user.display_name} 🫂 {user.display_name}"
+            description=f"{ctx.author.display_name} 🫂 {user.display_name}"
         )
     await ctx.reply(embed=embed)
 
